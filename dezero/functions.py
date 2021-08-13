@@ -97,6 +97,21 @@ def sum(x, axis=None, keepdims=False):
     return Sum(axis, keepdims)(x)
 
 
+class MatMul(Function):
+    def forward(self, x, W):
+        return x.dot(W)
+
+    def backward(self, gy):
+        x, W = self.inputs
+        gx = matmul(gy, W.T)
+        gW = matmul(x.T, gy)
+        return gx, gW
+
+
+def matmul(x, W):
+    return MatMul()(x, W)
+
+
 class Sin(Function):
     def forward(self, x):
         return np.sin(x)
@@ -134,3 +149,21 @@ class Tanh(Function):
 
 def tanh(x):
     return Tanh()(x)
+
+
+class MeanSquaredError(Function):
+    def forward(self, x0, x1):
+        diff = x0 - x1
+        return (diff ** 2).sum() / len(diff)
+
+    def backward(self, gy):
+        x0, x1 = self.inputs
+        diff = x0 - x1
+        gy = broadcast_to(gy, diff.shape)
+        gx0 = gy * diff * (2.0 / len(diff))
+        gx1 = -gx0
+        return gx0, gx1
+
+
+def mean_squared_error(x0, x1):
+    return MeanSquaredError()(x0, x1)
