@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.core.fromnumeric import transpose
 from dezero.core import Function, as_variable
+from dezero import utils
 
 
 class Reshape(Function):
@@ -40,6 +41,60 @@ class Transpose(Function):
 
 def transpose(x, axes=None):
     return Transpose(axes)(x)
+
+
+class BroadcastTo(Function):
+    def __init__(self, shape):
+        self.shape = shape
+
+    def forward(self, x):
+        self.x_shape = x.shape
+        return np.broadcast_to(x, self.shape)
+
+    def backward(self, gy):
+        return sum_to(gy, self.x_shape)
+
+
+def broadcast_to(x, shape):
+    if x.shape == shape:
+        return as_variable(x)
+    return BroadcastTo(shape)(x)
+
+
+class SumTo(Function):
+    def __init__(self, shape):
+        self.shape = shape
+
+    def forward(self, x):
+        self.x_shape = x.shape
+        return utils.sum_to(x, self.shape)
+
+    def backward(self, gy):
+        return broadcast_to(gy, self.x_shape)
+
+
+def sum_to(x, shape):
+    if x.shape == shape:
+        return as_variable(x)
+    return SumTo(shape)(x)
+
+
+class Sum(Function):
+    def __init__(self, axis, keepdims):
+        self.axis = axis
+        self.keepdims = keepdims
+
+    def forward(self, x):
+        self.x_shape = x.shape
+        return x.sum(axis=self.axis, keepdims=self.keepdims)
+
+    def backward(self, gy):
+        gy = utils.reshape_sum_backward(gy, self.x_shape, self.axis, self.keepdims)
+        return broadcast_to(gy, self.x_shape)
+
+
+def sum(x, axis=None, keepdims=False):
+    return Sum(axis, keepdims)(x)
 
 
 class Sin(Function):
