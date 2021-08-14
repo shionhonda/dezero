@@ -20,5 +20,7 @@ else:
         as_variable,
         setup_variable,
     )
+    from dezero.layers import Layer
+    from dezero.models import Model
 
 setup_variable()
