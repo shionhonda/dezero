@@ -2,6 +2,7 @@ import numpy as np
 from numpy.core.fromnumeric import transpose
 from dezero.core import Function, Variable, as_array, as_variable
 from dezero import utils
+from dezero import cuda
 
 
 class Reshape(Function):
@@ -31,11 +32,12 @@ class Transpose(Function):
         return y
 
     def backward(self, gy):
+        xp = cuda.get_array_module(gy)
         if self.axes is None:
             return transpose(gy)
 
         axes_len = len(self.axes)
-        inv_axes = tuple(np.argsort([ax for ax in self.axes]))
+        inv_axes = tuple(xp.argsort([ax for ax in self.axes]))
         return transpose(gy, inv_axes)
 
 
@@ -48,8 +50,9 @@ class BroadcastTo(Function):
         self.shape = shape
 
     def forward(self, x):
+        xp = cuda.get_array_module(x)
         self.x_shape = x.shape
-        return np.broadcast_to(x, self.shape)
+        return xp.broadcast_to(x, self.shape)
 
     def backward(self, gy):
         return sum_to(gy, self.x_shape)
@@ -114,7 +117,8 @@ def matmul(x, W):
 
 class Sin(Function):
     def forward(self, x):
-        return np.sin(x)
+        xp = cuda.get_array_module(x)
+        return xp.sin(x)
 
     def backward(self, gy):
         (x,) = self.inputs
@@ -127,7 +131,8 @@ def sin(x):
 
 class Cos(Function):
     def forward(self, x):
-        return np.cos(x)
+        xp = cuda.get_array_module(x)
+        return xp.cos(x)
 
     def backward(self, gy):
         (x,) = self.inputs
@@ -140,7 +145,8 @@ def cos(x):
 
 class Tanh(Function):
     def forward(self, x):
-        return np.tanh(x)
+        xp = cuda.get_array_module(x)
+        return xp.tanh(x)
 
     def backward(self, gy):
         y = self.outputs[0]()
@@ -153,7 +159,8 @@ def tanh(x):
 
 class Exp(Function):
     def forward(self, x):
-        y = np.exp(x)
+        xp = cuda.get_array_module(x)
+        y = xp.exp(x)
         return y
 
     def backward(self, gy):
@@ -168,7 +175,8 @@ def exp(x):
 
 class Log(Function):
     def forward(self, x):
-        y = np.log(x)
+        xp = cuda.get_array_module(x)
+        y = xp.log(x)
         return y
 
     def backward(self, gy):
@@ -218,7 +226,8 @@ def sigmoid_simple(x):
 class Sigmoid(Function):
     def forward(self, x):
         # y = 1 / (1 + xp.exp(-x))
-        y = np.tanh(x * 0.5) * 0.5 + 0.5  # Better implementation
+        xp = cuda.get_array_module(x)
+        y = xp.tanh(x * 0.5) * 0.5 + 0.5  # Better implementation
         return y
 
     def backward(self, gy):
@@ -243,8 +252,9 @@ class Softmax(Function):
         self.axis = axis
 
     def forward(self, x):
+        xp = cuda.get_array_module(x)
         y = x - x.max(axis=self.axis, keepdims=True)
-        y = np.exp(y)
+        y = xp.exp(y)
         y /= y.sum(axis=self.axis, keepdims=True)
         return y
 
@@ -262,7 +272,8 @@ def softmax(x, axis=1):
 
 class ReLU(Function):
     def forward(self, x):
-        return np.maximum(x, 0.0)
+        xp = cuda.get_array_module(x)
+        return xp.maximum(x, 0.0)
 
     def backward(self, gy):
         (x,) = self.inputs
@@ -281,8 +292,9 @@ class GetItemGrad(Function):
         self.in_shape = in_shape
 
     def forward(self, gy):
-        gx = np.zeros(self.in_shape)
-        np.add.at(gx, self.slices, gy)
+        xp = cuda.get_array_module(gy)
+        gx = xp.zeros(self.in_shape)
+        xp.add.at(gx, self.slices, gy)
         return gx
 
     def backward(self, ggx):
@@ -312,7 +324,8 @@ class Clip(Function):
         self.x_max = x_max
 
     def forward(self, x):
-        y = np.clip(x, self.x_min, self.x_max)
+        xp = cuda.get_array_module(x)
+        y = xp.clip(x, self.x_min, self.x_max)
         return y
 
     def backward(self, gy):
@@ -352,33 +365,36 @@ def mean_squared_error(x0, x1):
 
 
 def softmax_cross_entropy_simple(x, t):
+    xp = cuda.get_array_module(x)
     x, t = as_variable(x), as_variable(t)
     N = x.shape[0]
     p = softmax(x)
     p = clip(p, 1e-15, 1.0)  # To avoid log(0)
     log_p = log(p)
-    tlog_p = log_p[np.arange(N), t.data]
+    tlog_p = log_p[xp.arange(N), t.data]
     y = -1 * sum(tlog_p) / N
     return y
 
 
 class SoftmaxCrossEntropy(Function):
     def forward(self, x, t):
+        xp = cuda.get_array_module(x)
         N = x.shape[0]
         log_z = utils.logsumexp(x, axis=1)
         log_p = x - log_z
-        log_p = log_p[np.arange(N), t.ravel()]
-        y = -log_p.sum() / np.float32(N)
+        log_p = log_p[xp.arange(N), t.ravel()]
+        y = -log_p.sum() / xp.float32(N)
         return y
 
     def backward(self, gy):
+        xp = cuda.get_array_module(gy)
         x, t = self.inputs
         N, CLS_NUM = x.shape
 
         gy *= 1 / N
         y = softmax(x)
         # convert to one-hot
-        t_onehot = np.eye(CLS_NUM, dtype=t.dtype)[t.data]
+        t_onehot = xp.eye(CLS_NUM, dtype=t.dtype)[t.data]
         y = (y - t_onehot) * gy
         return y
 
