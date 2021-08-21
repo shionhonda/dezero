@@ -1,4 +1,3 @@
-from typing import get_origin
 import numpy as np
 
 gpu_enable = True
