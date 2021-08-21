@@ -1,6 +1,7 @@
 import weakref
 import numpy as np
 import dezero.functions as F
+from dezero import cuda
 from dezero.core import Parameter
 
 
@@ -30,7 +31,7 @@ class Layer:
             if isinstance(obj, Layer):
                 yield from obj.params()
             else:
-                yield self.__dict__[name]
+                yield obj
 
     def cleargrads(self):
         for param in self.params():
@@ -60,13 +61,14 @@ class Linear(Layer):
         else:
             self.b = Parameter(np.zeros(out_size, dtype=dtype), name="b")
 
-    def _init_W(self):
+    def _init_W(self, xp=np):
         I, O = self.in_size, self.out_size
-        self.W.data = np.random.randn(I, O).astype(self.dtype) * np.sqrt(1 / I)
+        self.W.data = xp.random.randn(I, O).astype(self.dtype) * xp.sqrt(1 / I)
 
     def forward(self, x):
         if self.W.data is None:
             self.in_size = x.shape[1]
-            self._init_W()
+            xp = cuda.get_array_module(x)
+            self._init_W(xp)
 
         return F.linear(x, self.W, self.b)
