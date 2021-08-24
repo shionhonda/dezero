@@ -423,4 +423,4 @@ def dropout(x, dropout_ratio=0.5):
         return x
 
 
-from dezero.functions_conv import im2col, col2im, conv2d_simple
+from dezero.functions_conv import im2col, col2im, conv2d_simple, conv2d
