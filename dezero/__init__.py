@@ -15,7 +15,9 @@ else:
         Variable,
         Function,
         using_config,
+        Config,
         no_grad,
+        test_mode,
         as_array,
         as_variable,
         setup_variable,
@@ -24,6 +26,7 @@ else:
     from dezero.models import Model
     from dezero.datasets import Dataset
     from dezero.dataloaders import DataLoader
+    import dezero.functions_conv
 
     import dezero.datasets
     import dezero.cuda

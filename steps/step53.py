@@ -26,6 +26,9 @@ if __name__ == "__main__":
     model = MLP((hidden_size, hidden_size, 10), activation=F.relu)
     optimizer = optimizers.SGD().setup(model)
 
+    if os.path.exists("my_mlp.npz"):
+        model.load_weights("my_mlp.npz")
+
     if dezero.cuda.gpu_enable:
         train_loader.to_gpu()
         model.to_gpu()
@@ -69,6 +72,8 @@ if __name__ == "__main__":
         test_accs.append(avg_acc)
         print("epoch %d" % (epoch + 1))
         print("test loss %.4f, accuracy %.4f" % (avg_loss, avg_acc))
+
+    model.save_weights("my_mlp.npz")
 
     fig = plt.figure(figsize=(12, 5))
     ax1 = fig.add_subplot(1, 2, 1)
