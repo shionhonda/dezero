@@ -1,6 +1,7 @@
-import numpy as np
-import weakref
 import contextlib
+import weakref
+
+import numpy as np
 
 
 def as_array(x):

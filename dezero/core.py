@@ -1,7 +1,9 @@
-import dezero
-import numpy as np
-import weakref
 import contextlib
+import weakref
+
+import numpy as np
+
+import dezero
 
 try:
     import cupy

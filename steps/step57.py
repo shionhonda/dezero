@@ -4,9 +4,9 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 import numpy as np
+
 import dezero.functions as F
 from dezero.core import Variable
-
 
 if __name__ == "__main__":
     x1 = np.random.rand(1, 3, 7, 7)

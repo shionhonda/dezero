@@ -4,13 +4,14 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 import math
-import numpy as np
-import matplotlib.pyplot as plt
-import dezero
-from dezero import optimizers
-import dezero.functions as F
-from dezero.models import MLP
 
+import matplotlib.pyplot as plt
+import numpy as np
+
+import dezero
+import dezero.functions as F
+from dezero import optimizers
+from dezero.models import MLP
 
 if __name__ == "__main__":
     max_epochs = 300

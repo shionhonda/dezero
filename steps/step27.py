@@ -4,8 +4,10 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 import math
+
 import numpy as np
-from dezero import Variable, Function
+
+from dezero import Function, Variable
 from dezero.utils import plot_dot_graph
 
 

@@ -1,7 +1,9 @@
 import os
 import subprocess
-import numpy as np
 import urllib.request
+
+import numpy as np
+
 
 # =============================================================================
 # Visualize for computational graph

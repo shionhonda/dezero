@@ -1,8 +1,9 @@
-from dezero.functions import Linear, linear
 import numpy as np
+
 from dezero import cuda
 from dezero.core import Function, as_variable
-from dezero.utils import pair, get_conv_outsize, get_deconv_outsize
+from dezero.functions import Linear, linear
+from dezero.utils import get_conv_outsize, get_deconv_outsize, pair
 
 
 def conv2d_simple(x, W, b=None, stride=1, pad=0):

@@ -1,5 +1,6 @@
-import numpy as np
 import unittest
+
+import numpy as np
 
 
 def as_array(x):

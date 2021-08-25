@@ -3,11 +3,11 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-import numpy as np
 import matplotlib.pyplot as plt
-from dezero import Variable
-import dezero.functions as F
+import numpy as np
 
+import dezero.functions as F
+from dezero import Variable
 
 if __name__ == "__main__":
     x = Variable(np.linspace(-7, 7, 200))

@@ -1,10 +1,12 @@
+import os
 import weakref
+
 import numpy as np
+
 import dezero.functions as F
+from dezero.utils import pair
 from dezero import cuda
 from dezero.core import Parameter
-import os
-from utils import pair
 
 
 class Layer:

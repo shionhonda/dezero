@@ -1,11 +1,13 @@
-import os
 import gzip
-import tarfile
+import os
 import pickle
-import numpy as np
+import tarfile
+
 import matplotlib.pyplot as plt
-from dezero.utils import get_file, cache_dir
-from dezero.transforms import Compose, Flatten, ToFloat, Normalize
+import numpy as np
+
+from dezero.transforms import Compose, Flatten, Normalize, ToFloat
+from dezero.utils import cache_dir, get_file
 
 
 class Dataset:

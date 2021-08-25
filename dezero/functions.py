@@ -1,9 +1,9 @@
 import numpy as np
 from numpy.core.fromnumeric import transpose
+
 import dezero
+from dezero import cuda, utils
 from dezero.core import Function, Variable, as_array, as_variable
-from dezero import utils
-from dezero import cuda
 
 
 class Reshape(Function):
@@ -423,4 +423,5 @@ def dropout(x, dropout_ratio=0.5):
         return x
 
 
-from dezero.functions_conv import im2col, col2im, conv2d_simple, conv2d
+from dezero.functions_conv import (col2im, conv2d, conv2d_simple, im2col,
+                                   pooling)
